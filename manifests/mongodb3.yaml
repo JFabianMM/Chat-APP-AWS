@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongodb3
+spec:
+  serviceName: mongodb3
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongodb3
+  template:
+    metadata:
+      labels:
+        app: mongodb3
+        selector: mongodb3
+    spec:
+      containers:
+      - name: mongodb3
+        image: mongo
+        ports:
+        - containerPort: 27017
+        volumeMounts:
+        - name: ebs-storage
+          mountPath: /ebs-data
+        env:
+        - name: MONGO_INITDB_ROOT_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: mysecret
+              key: mongoDB3UserName
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysecret
+              key: mongoDB3Password
+      volumes:
+      - name: ebs-storage
+        persistentVolumeClaim:
+          claimName: ebs-claim        

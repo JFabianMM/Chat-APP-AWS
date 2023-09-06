@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authorization
+  labels: 
+    app: mongodb3
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      role: authorization
+  template:
+    metadata:
+      labels:
+        role: authorization
+    spec:
+      containers:
+      - image: 121503602521.dkr.ecr.us-east-2.amazonaws.com/authorization7:1
+        name: authorization
+        ports:
+        - containerPort: 4002
+        env:
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: mysecret
+              key: jwtsecret
+        - name: SERVER_PORT
+          value: "4002"
+        - name: MONGODB3_URI
+          valueFrom:
+            secretKeyRef:
+              name: mysecret
+              key: mongoDB3URI
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: authorization
+spec: 
+  ports: 
+  - port: 4002
+    targetPort: 4002
+  selector: 
+    role: authorization

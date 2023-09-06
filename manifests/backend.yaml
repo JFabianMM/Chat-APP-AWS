@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  labels: 
+    app: mongodb2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      role: backend
+  template:
+    metadata:
+      labels:
+        role: backend
+    spec:
+      containers:
+      - image: 121503602521.dkr.ecr.us-east-2.amazonaws.com/backend8:1
+        name: backend
+        ports:
+        - containerPort: 4001
+        env:
+        - name: SERVER_PORT
+          value: "4001"
+        - name: MONGODB2_URI
+          valueFrom:
+            secretKeyRef:
+              name: mysecret
+              key: mongoDB2URI
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+spec: 
+  ports: 
+  - port: 4001
+    targetPort: 4001
+  selector: 
+    role: backend

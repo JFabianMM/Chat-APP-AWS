@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongodb2
+spec:
+  serviceName: mongodb2
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongodb2
+  template:
+    metadata:
+      labels:
+        app: mongodb2
+        selector: mongodb2
+    spec:
+      containers:
+      - name: mongodb2
+        image: mongo
+        ports:
+        - containerPort: 27017
+        volumeMounts:
+        - name: ebs-storage
+          mountPath: /ebs-data
+        env:
+        - name: MONGO_INITDB_ROOT_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: mysecret
+              key: mongoDB2UserName
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysecret
+              key: mongoDB2Password
+      volumes:
+      - name: ebs-storage
+        persistentVolumeClaim:
+          claimName: ebs-claim        

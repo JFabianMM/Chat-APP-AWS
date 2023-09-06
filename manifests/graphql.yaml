@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: graphql
+  labels: 
+    app: mongodb1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      role: graphql
+  template:
+    metadata:
+      labels:
+        role: graphql
+    spec:
+      containers:
+      - image: 121503602521.dkr.ecr.us-east-2.amazonaws.com/graphql8:1
+        name: graphql
+        ports:
+        - containerPort: 4000
+        env:
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: mysecret
+              key: jwtsecret
+        - name: MONGODB1_URI
+          valueFrom:
+            secretKeyRef:
+              name: mysecret
+              key: mongoDB1URI
+        - name: SERVER_PORT
+          value: "4000"
+        - name: BACKEND_MICROSERVICE
+          value: "http://backend:4001/api/users/"              
+        - name: AUTHORIZATION_MICROSERVICE
+          value: "http://authorization:4002/api/users/"
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: graphql
+spec:
+  type: NodePort
+  ports: 
+  - port: 4000
+    targetPort: 4000
+    nodePort: 30001
+  selector: 
+    role: graphql
+     

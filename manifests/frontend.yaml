@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  labels: 
+    app: frontendServiceDB
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      role: frontend
+  template:
+    metadata:
+      labels:
+        role: frontend
+    spec:
+      containers:
+      - image: 121503602521.dkr.ecr.us-east-2.amazonaws.com/frontend15:1
+        name: frontend
+        ports:
+        - containerPort: 3000
+        env:
+        - name: SERVER_PORT
+          value: "3000"
+        - name: BACKEND_MICROSERVICE
+          value: "http://backend:4001/api/users/"
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  type: NodePort
+  ports: 
+  - port: 3000
+    targetPort: 3000
+    nodePort: 30000
+  selector: 
+    role: frontend
